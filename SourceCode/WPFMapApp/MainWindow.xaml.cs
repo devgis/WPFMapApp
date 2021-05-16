@@ -26,7 +26,10 @@ namespace WPFMapApp
             InitializeComponent();
             //MapPoint mapCenterPoint = new MapPoint(-118.805, 34.027, SpatialReferences.Wgs84);
             //MainMapView.SetViewpoint(new Viewpoint(mapCenterPoint, 100000));
-            MainMapView.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory+"map.html");
+            //MainMapView.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory+"map.html");
+
+            Uri uri = new Uri(@"pack://application:,,,/map.html");
+            MainMapView.NavigateToStream(Application.GetResourceStream(uri).Stream);
         }
 
         private void MainMapView_Navigated(object sender, NavigationEventArgs e)
