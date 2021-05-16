@@ -5,8 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFMapApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="地图窗口" Height="450" Width="800" WindowState="Maximized">
+    <!--<Window.Resources>
+        <local:MapViewModel x:Key="MapViewModel" />
+    </Window.Resources>-->
+    <Grid x:Name="LayoutRoot" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+
+        <WebBrowser  Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="999" x:Name="MainMapView"  Navigated="MainMapView_Navigated"  />
+        <Button Panel.ZIndex="22" Grid.Row="0" Grid.Column="1" Content="导入轨迹"/>
+        <Button Panel.ZIndex="22" Grid.Row="0" Grid.Column="3" Content="导出轨迹"/>
+        <Button Panel.ZIndex="22" Grid.Row="0" Grid.Column="5" Content="管理轨迹"/>
+        <Button Panel.ZIndex="22" Grid.Row="0" Grid.Column="7" Content="清除轨迹"/>
     </Grid>
 </Window>

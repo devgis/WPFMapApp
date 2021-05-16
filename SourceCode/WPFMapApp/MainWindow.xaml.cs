@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,6 +24,25 @@ namespace WPFMapApp
         public MainWindow()
         {
             InitializeComponent();
+            //MapPoint mapCenterPoint = new MapPoint(-118.805, 34.027, SpatialReferences.Wgs84);
+            //MainMapView.SetViewpoint(new Viewpoint(mapCenterPoint, 100000));
+            MainMapView.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory+"map.html");
+        }
+
+        private void MainMapView_Navigated(object sender, NavigationEventArgs e)
+        {
+            SuppressScriptErrors((WebBrowser)sender, true);
+        }
+
+        public void SuppressScriptErrors(WebBrowser wb, bool Hide)
+        {
+            FieldInfo fiComWebBrowser = typeof(WebBrowser).GetField("_axIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (fiComWebBrowser == null) return;
+
+            object objComWebBrowser = fiComWebBrowser.GetValue(wb);
+            if (objComWebBrowser == null) return;
+
+            objComWebBrowser.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, objComWebBrowser, new object[] { Hide });
         }
     }
 }
