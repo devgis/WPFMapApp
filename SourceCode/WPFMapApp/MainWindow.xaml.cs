@@ -30,6 +30,8 @@ namespace WPFMapApp
 
             Uri uri = new Uri(@"pack://application:,,,/map.html");
             MainMapView.NavigateToStream(Application.GetResourceStream(uri).Stream);
+
+            
         }
 
         private void MainMapView_Navigated(object sender, NavigationEventArgs e)
@@ -51,6 +53,19 @@ namespace WPFMapApp
         public void SetMapCenter(float x, float y)
         {
             MainMapView.InvokeScript("setCenter",new object[] { x,y});
+        }
+
+        public void DrawLine(List<MyPoint> points)
+        {
+            try
+            {
+                MainMapView.InvokeScript("drawLine", points);
+            }
+            catch(Exception ex)
+            {
+                MessageHelper.ShowError("绘制轨迹发生错误:"+ex.Message);
+            }
+            
         }
 
         private void SetCenter_Click(object sender, RoutedEventArgs e)
@@ -97,6 +112,11 @@ namespace WPFMapApp
                 MessageHelper.ShowError("发生异常:" + ex.Message);
             }
             
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            DrawLine(new List<MyPoint>());
         }
     }
 }

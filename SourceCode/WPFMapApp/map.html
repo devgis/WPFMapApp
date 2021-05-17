@@ -112,12 +112,35 @@
         controlBar.hide();
         }
 
-        function setCenter(x, y) {
-            // 传入经纬度，设置地图中心点
-            var position = new AMap.LngLat(x, y);  // 标准写法
-            // 简写 var position = [116, 39]; 
-            map.setCenter(position); 
+    function setCenter(x, y) {
+        // 传入经纬度，设置地图中心点
+        var position = new AMap.LngLat(x, y);  // 标准写法
+        // 简写 var position = [116, 39]; 
+        map.setCenter(position); 
         }
+    var polyline;
+    function drawLine(points) {
+        alert(points);
+        //map.remove(polyline);
+        var path = [
+            new AMap.LngLat(101.368904, 39.913423),
+            new AMap.LngLat(105.382122, 39.901176),
+            new AMap.LngLat(110.387271, 39.912501),
+            new AMap.LngLat(126.398258, 39.904600)
+        ];
+
+        // 创建折线实例
+        var polyline = new AMap.Polyline({
+            path: path,
+            borderWeight: 2, // 线条宽度，默认为 1
+            strokeColor: 'red', // 线条颜色
+            lineJoin: 'round' // 折线拐点连接处样式
+        });
+
+        // 将折线添加至地图实例
+        map.add(polyline);
+    }
+    //drawLine({});
     </script>
 </body>
 </html>
