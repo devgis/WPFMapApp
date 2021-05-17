@@ -23,6 +23,10 @@
             <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="100"/>
         </Grid.ColumnDefinitions>
 
         <WebBrowser  Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="999" x:Name="MainMapView"  Navigated="MainMapView_Navigated"  />
@@ -30,5 +34,7 @@
         <Button Panel.ZIndex="22" Grid.Row="0" Grid.Column="3" Content="导出轨迹"/>
         <Button Panel.ZIndex="22" Grid.Row="0" Grid.Column="5" Content="管理轨迹"/>
         <Button Panel.ZIndex="22" Grid.Row="0" Grid.Column="7" Content="清除轨迹"/>
+        <TextBox x:Name="tbCenter" Panel.ZIndex="22" Grid.Row="0" Grid.Column="9" Text="108,35"/>
+        <Button x:Name="SetCenter" Click="SetCenter_Click" Panel.ZIndex="22" Grid.Row="0" Grid.Column="11" Content="移动中心"/>
     </Grid>
 </Window>

@@ -47,5 +47,56 @@ namespace WPFMapApp
 
             objComWebBrowser.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, objComWebBrowser, new object[] { Hide });
         }
+
+        public void SetMapCenter(float x, float y)
+        {
+            MainMapView.InvokeScript("setCenter",new object[] { x,y});
+        }
+
+        private void SetCenter_Click(object sender, RoutedEventArgs e)
+        {
+            try {
+                if (string.IsNullOrEmpty(tbCenter.Text.Trim()))
+                {
+                    MessageHelper.ShowError("请输入中点 格式为 经度,纬度  经度-180~180，纬度 -90~90");
+                    tbCenter.Focus();
+                    return;
+                }
+                else
+                {
+
+                    string[] arr = tbCenter.Text.Trim().Split(',');
+                    if (arr != null && arr.Length == 2)
+                    {
+                        try
+                        {
+                            float x = Convert.ToSingle(arr[0]);
+                            float y = Convert.ToSingle(arr[1]);
+                            if (x > -180 && x < 180 && y > -90 && y < 90)
+                            {
+                                SetMapCenter(x, y);
+                            }
+                            else
+                            {
+                                MessageHelper.ShowError("中点格式不正确 格式为 经度,纬度  经度-180~180，纬度 -90~90");
+                                tbCenter.Focus();
+                                return;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageHelper.ShowError("中点格式不正确 格式为 经度,纬度  经度-180~180，纬度 -90~90");
+                            tbCenter.Focus();
+                            return;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowError("发生异常:" + ex.Message);
+            }
+            
+        }
     }
 }
