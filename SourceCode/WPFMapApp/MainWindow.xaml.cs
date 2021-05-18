@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -57,15 +59,38 @@ namespace WPFMapApp
 
         public void DrawLine(List<MyPoint> points)
         {
+            if (points == null || points.Count <= 0)
+            {
+                RemoveLine();
+                return;
+            }
             try
             {
-                MainMapView.InvokeScript("drawLine", points);
+                //List<float> langandlats = new List<float>();
+                //foreach (var p in points)
+                //{
+                //    langandlats.AddRange(new float[] { p.X, p.Y });
+                //}
+                MainMapView.InvokeScript("drawLine",JsonConvert.SerializeObject(points));
             }
             catch(Exception ex)
             {
                 MessageHelper.ShowError("绘制轨迹发生错误:"+ex.Message);
             }
             
+        }
+
+        public void RemoveLine()
+        {
+            try
+            {
+                MainMapView.InvokeScript("removeLine", null);
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowError("清除轨迹发生错误:" + ex.Message);
+            }
+
         }
 
         private void SetCenter_Click(object sender, RoutedEventArgs e)
@@ -116,7 +141,48 @@ namespace WPFMapApp
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            DrawLine(new List<MyPoint>());
+            var list = new List<MyPoint>() {
+                new MyPoint(){ Index=0,X=102.34f,Y=31.32f },
+                new MyPoint(){ Index=1,X=103.34f,Y=33.32f},
+                new MyPoint(){ Index=2,X=105.34f,Y=32.32f},
+                new MyPoint(){ Index=3,X=108.34f,Y=34.32f},
+            };
+            List<float> langandlats = new  List<float>();
+            foreach (var p in list)
+            {
+                langandlats.AddRange(new float[]{ p.X, p.Y});
+            }
+            DrawLine(new List<MyPoint>() { 
+                new MyPoint(){ Index=0,X=102.34f,Y=31.32f },
+                new MyPoint(){ Index=1,X=103.34f,Y=33.32f},
+                new MyPoint(){ Index=2,X=105.34f,Y=32.32f},
+                new MyPoint(){ Index=3,X=108.34f,Y=34.32f},
+            });
+        }
+
+        private void btClearLine_Click(object sender, RoutedEventArgs e)
+        {
+            RemoveLine();
+        }
+
+        private void btManagerLine_Click(object sender, RoutedEventArgs e)
+        {
+            DrawLine(new List<MyPoint>() {
+                new MyPoint(){ Index=0,X=102.34f,Y=31.32f },
+                new MyPoint(){ Index=1,X=103.34f,Y=33.32f},
+                new MyPoint(){ Index=2,X=105.34f,Y=32.32f},
+                new MyPoint(){ Index=3,X=108.34f,Y=34.32f},
+            });
+        }
+
+        private void btExportPanel_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btImportPanel_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

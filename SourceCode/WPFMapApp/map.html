@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title>带功能控件的地图</title>
+    <title>地图窗口</title>
     <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
     <script src="https://cache.amap.com/lbs/static/es5.min.js"></script>
     <script src="https://webapi.amap.com/maps?v=2.0&key=aef1743f3931d5e2568d678ac6d66fb9&&plugin=AMap.Scale,AMap.HawkEye,AMap.ToolBar,AMap.ControlBar"></script>
-
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -24,123 +24,204 @@
             left: 20px;
             bottom: auto;
         }
+        #text {
+            opacity: 0.3;
+        }
     </style>
 </head>
 <body>
     <div id="container"></div>
+    <!--<div class="info" id="text" />-->
     <script>
-    var scale = new AMap.Scale(),
-    toolBar = new AMap.ToolBar({
-        position: {
-            top: '110px',
-            right: '40px'
-        }
-    }),
-    controlBar = new AMap.ControlBar({
-        position: {
-            top: '10px',
-            right: '10px',
-        }
-    }),
-    overView = new AMap.HawkEye({
-        opened: false
-    }),
+        var infoWindow = new AMap.InfoWindow({ offset: new AMap.Pixel(0, -30) });
+        var scale = new AMap.Scale(),
+            toolBar = new AMap.ToolBar({
+                position: {
+                    top: '110px',
+                    right: '40px'
+                }
+            }),
+            controlBar = new AMap.ControlBar({
+                position: {
+                    top: '10px',
+                    right: '10px',
+                }
+            }),
+            overView = new AMap.HawkEye({
+                opened: false
+            }),
 
-    //// 构造官方卫星、路网图层
-    //var satelliteLayer = new AMap.TileLayer.Satellite();
-    //var roadNetLayer = new AMap.TileLayer.RoadNet();
+            //// 构造官方卫星、路网图层
+            //var satelliteLayer = new AMap.TileLayer.Satellite();
+            //var roadNetLayer = new AMap.TileLayer.RoadNet();
 
-    map = new AMap.Map("container", {
-        viewMode: '3D',
-        center: [108.397428, 34.90923],
-        zoom: 4,
-        pitch: 30,
-        layers: [
-            // 卫星
-            new AMap.TileLayer.Satellite(),
-            // 路网
-            new AMap.TileLayer.RoadNet()
-        ]
-    });
-    map.addControl(scale);
-    map.addControl(toolBar);
-    map.addControl(controlBar);
-    //map.addControl(overView);
-    function toggleScale(checkbox) {
-        if (checkbox.checked) {
-            scale.show();
-        } else {
-            scale.hide();
-        }
-    }
-    function toggleToolBar(checkbox) {
-        if (checkbox.checked) {
-            showToolBar();
-        } else {
-            hideToolBar();
-        }
-    }
-    function toggleControlBar(checkbox) {
-        if (checkbox.checked) {
-            controlBar.show()
-        } else {
-            controlBar.hide()
-        }
-    }
-    function toggleOverViewShow(checkbox) {
-        if (checkbox.checked) {
-            overView.show();
-        } else {
-            overView.hide();
-        }
-    }
+            map = new AMap.Map("container", {
+                viewMode: '3D',
+                center: [108.397428, 34.90923],
+                zoom: 4,
+                pitch: 30,
+                layers: [
+                    // 卫星
+                    new AMap.TileLayer.Satellite(),
+                    // 路网
+                    new AMap.TileLayer.RoadNet()
+                ]
+            });
+        map.addControl(scale);
+        map.addControl(toolBar);
+        map.addControl(controlBar);
+        //map.addControl(overView);
 
-    function showToolBar() {
-        document.getElementById('toolbar').checked = true;
-        toolBar.show();
-    }
-    function hideToolBar() {
-        document.getElementById('toolbar').checked = false;
-        toolBar.hide();
-    }
-    function showControlBar() {
-        document.getElementById('controlBar').checked = true;
-        controlBar.show();
-    }
-    function hideControlBar() {
-        document.getElementById('controlBar').checked = false;
-        controlBar.hide();
+
+        //function showInfoClick(e) {
+        //    var text = '您在 [ ' + e.lnglat.getLng() + ',' + e.lnglat.getLat() + ' ] 的位置单击了地图！'
+        //    document.querySelector("#text").innerText = text;
+        //}
+        //function showInfoOver(e) {
+        //    var text = '鼠标移入覆盖物！'
+        //    document.querySelector("#text").innerText = text;
+        //}
+        //function showInfoOut(e) {
+        //    var text = '鼠标移出覆盖物！'
+        //    document.querySelector("#text").innerText = text;
+        //}
+
+        //map.on('click', showInfoClick);
+
+
+        function toggleScale(checkbox) {
+            if (checkbox.checked) {
+                scale.show();
+            } else {
+                scale.hide();
+            }
+        }
+        function toggleToolBar(checkbox) {
+            if (checkbox.checked) {
+                showToolBar();
+            } else {
+                hideToolBar();
+            }
+        }
+        function toggleControlBar(checkbox) {
+            if (checkbox.checked) {
+                controlBar.show()
+            } else {
+                controlBar.hide()
+            }
+        }
+        function toggleOverViewShow(checkbox) {
+            if (checkbox.checked) {
+                overView.show();
+            } else {
+                overView.hide();
+            }
         }
 
-    function setCenter(x, y) {
-        // 传入经纬度，设置地图中心点
-        var position = new AMap.LngLat(x, y);  // 标准写法
-        // 简写 var position = [116, 39]; 
-        map.setCenter(position); 
+        function showToolBar() {
+            document.getElementById('toolbar').checked = true;
+            toolBar.show();
         }
-    var polyline;
-    function drawLine(points) {
-        alert(points);
-        //map.remove(polyline);
-        var path = [
-            new AMap.LngLat(101.368904, 39.913423),
-            new AMap.LngLat(105.382122, 39.901176),
-            new AMap.LngLat(110.387271, 39.912501),
-            new AMap.LngLat(126.398258, 39.904600)
-        ];
+        function hideToolBar() {
+            document.getElementById('toolbar').checked = false;
+            toolBar.hide();
+        }
+        function showControlBar() {
+            document.getElementById('controlBar').checked = true;
+            controlBar.show();
+        }
+        function hideControlBar() {
+            document.getElementById('controlBar').checked = false;
+            controlBar.hide();
+        }
 
-        // 创建折线实例
-        var polyline = new AMap.Polyline({
-            path: path,
-            borderWeight: 2, // 线条宽度，默认为 1
-            strokeColor: 'red', // 线条颜色
-            lineJoin: 'round' // 折线拐点连接处样式
-        });
+        function setCenter(x, y) {
+            // 传入经纬度，设置地图中心点
+            var position = new AMap.LngLat(x, y);  // 标准写法
+            // 简写 var position = [116, 39];
+            map.setCenter(position);
+        }
+        var polyline;
+        var markers = [];
+        function drawLine(parrstr) {
+            //alert(typeof parrstr);
+            var points = JSON.parse(parrstr);
+            //alert( typeof points);
+            removeLine();
 
-        // 将折线添加至地图实例
-        map.add(polyline);
-    }
-    //drawLine({});
+            var path = [];
+            for (var i = 0; i < points.length; i++) {
+                path.push(new AMap.LngLat(points[i].X, points[i].Y));
+
+                //添加点
+                var marker = new AMap.Marker({
+                    position: [points[i].X, points[i].Y],
+                    icon: new AMap.Icon({
+                        image: "http://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+                        size: new AMap.Size(20, 20),  //图标大小
+                        imageSize: new AMap.Size(20, 20)
+                    }),
+                    //icon: "http://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+                    offset: new AMap.Pixel(-10, -20)
+                });
+
+                //var marker = new AMap.CircleMarker({
+                //    center: marker0.center,
+                //    radius: 10,//3D视图下，CircleMarker半径不要超过64px
+                //    strokeColor: 'white',
+                //    strokeWeight: 2,
+                //    strokeOpacity: 0.5,
+                //    fillColor: 'rgba(0,0,255,1)',
+                //    fillOpacity: 0.5,
+                //    zIndex: 10,
+                //    bubble: true,
+                //    cursor: 'pointer',
+                //    clickable: true
+                //})
+                marker.setMap(map);
+                markers.push(marker);
+
+                marker.content = '坐标 X:' + points[i].X + ' Y:' + points[i].Y;
+                marker.on('click', markerClick);
+                //marker.emit('click', { target: marker }); //默认不打开
+            }
+            //alert(typeof path);
+            // 创建折线实例
+            polyline = new AMap.Polyline({
+                path: path,
+                borderWeight: 2, // 线条宽度，默认为 1
+                strokeColor: 'red', // 线条颜色
+                lineJoin: 'round' // 折线拐点连接处样式
+            });
+
+            
+            
+
+            // 将折线添加至地图实例
+            map.add(polyline);
+        }
+
+        function markerClick(e) {
+            infoWindow.setContent(e.target.content);
+            infoWindow.open(map, e.target.getPosition());
+        }
+
+        function removeLine() {
+            if (polyline != null && polyline != undefined) {
+                map.remove(polyline);
+                polyline = null;
+            }
+
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+                markers[i] = null;
+            }
+            markers = [];
+        }
+
+        ////test methods 
+        //drawLine("[{\"Index\":0,\"X\":102.34,\"Y\":31.32},{\"Index\":1,\"X\":103.34,\"Y\":33.32},{\"Index\":2,\"X\":105.34,\"Y\":32.32},{\"Index\":3,\"X\":108.34,\"Y\":34.32}]");
+        //removeLine();
     </script>
 </body>
 </html>
