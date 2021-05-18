@@ -1,4 +1,5 @@
 ﻿using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace WPFMapApp
     /// </summary>
     public partial class ManagerPoints : Window
     {
+        MainViewModel viewModel = null;
         public List<MyPoint> MyPoints
         {
             get;
@@ -32,36 +34,34 @@ namespace WPFMapApp
         {
             InitializeComponent();
             MyPoints = points;
-            this.DataContext = new MainViewModel();
-        }
-
-        private void btAdd_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void btInsert_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btDelete_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btClear_Click(object sender, RoutedEventArgs e)
-        {
-
+            viewModel = new MainViewModel(MyPoints);
+            this.DataContext = viewModel;
         }
 
         private void btCancel_Click(object sender, RoutedEventArgs e)
         {
-
+            this.DialogResult = false;
         }
 
         private void btOK_Click(object sender, RoutedEventArgs e)
         {
+            foreach(var item in viewModel.Items)
+            {
+                if(item.X>180||item.X<-180)
+                {
+                    MessageHelper.ShowError("经度范围为 -180~180 请检查！");
+                    return;
+                }
 
+                if (item.Y > 90 || item.Y < -90)
+                {
+                    MessageHelper.ShowError("纬度范围为 -90~90, 请检查！");
+                    return;
+                }
+            }
+
+            this.MyPoints = viewModel.Items.ToList();
+            this.DialogResult = true;
         }
     }
 
@@ -78,7 +78,7 @@ namespace WPFMapApp
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.  DataGrid
         /// </summary>
-        public MainViewModel()
+        public MainViewModel(List<MyPoint> points)
         {
             //注册设置vm里的DataGrid与界面的相关联
             Messenger.Default.Register<DataGrid>(this, MessageToken.SetDataGrid, (x) =>
@@ -98,39 +98,39 @@ namespace WPFMapApp
                 DDataGrid.ItemsSource = _Items;
             });
 
-            RemoveCmd = new RelayCommand(new Action<MyPoint>((p) => {
-                int index = Items.IndexOf(p);
-                if (index <= Items.Count - 1)
+            if (points != null && points.Count > 0)
+            {
+                for (int i = 0; i < points.Count; i++)
                 {
-                    Items.RemoveAt(index);
+                    Items.Add(points[i]);
                 }
-            }));
+            }
 
-            ClearDataCmd = new RelayCommand(new Action<MyPoint>((p) => {
-                Items.Clear();
-            }));
+            //ClearDataCmd = new RelayCommand(new Action<MyPoint>((p) => {
+            //    Items.Clear();
+            //}));
 
-            AddDataCmd = new RelayCommand(new Action<MyPoint>((p) => {
-                var item = new MyPoint();
-                item.X = 0;
-                item.Y = 0;
-                Items.Add(item);
-            }));
+            //AddDataCmd = new RelayCommand(new Action<MyPoint>((p) => {
+            //    var item = new MyPoint();
+            //    item.X = 0;
+            //    item.Y = 0;
+            //    Items.Add(item);
+            //}));
 
-            InsertAtCmd = new RelayCommand(new Action<MyPoint>((p) => {
-                int index = Items.IndexOf(p);
-                var item = new MyPoint();
-                item.X = 0;
-                item.Y = 0;
-                if (index <= Items.Count - 1)
-                {
-                    Items.Insert(index, item);
-                }
-                else
-                {
-                    Items.Add(item);
-                }
-            }));
+            //InsertAtCmd = new RelayCommand(new Action<MyPoint>((p) => {
+            //    int index = Items.IndexOf(SelectedItem);
+            //    var item = new MyPoint();
+            //    item.X = 0;
+            //    item.Y = 0;
+            //    if (index <= Items.Count - 1)
+            //    {
+            //        Items.Insert(index, item);
+            //    }
+            //    else
+            //    {
+            //        Items.Add(item);
+            //    }
+            //}));
         }
         /// <summary>
         /// 绑定的数据
@@ -148,25 +148,20 @@ namespace WPFMapApp
                 RaisePropertyChanged(() => Items);
             }
         }
-        
-        public RelayCommand AddDataCmd {get;set;}
 
-        public RelayCommand RemoveCmd {
-            get;
-            set;
-        }
+        public MyPoint SelectedItem { get; set; }
 
-        public RelayCommand InsertAtCmd
-        {
-            get;
-            set;
-        }
+        public RelayCommand AddDataCmd => new Lazy<RelayCommand>(() =>
+            new RelayCommand(AddData)).Value;
 
-        public RelayCommand ClearDataCmd
-        {
-            get;
-            set;
-        }
+        public RelayCommand RemoveCmd => new Lazy<RelayCommand>(() =>
+             new RelayCommand(RemoveAt)).Value;
+
+        public RelayCommand InsertAtCmd => new Lazy<RelayCommand>(() =>
+              new RelayCommand(InsertAt)).Value;
+
+        public RelayCommand ClearDataCmd => new Lazy<RelayCommand>(() =>
+              new RelayCommand(ClearData)).Value;
 
 
         private void AddData()
@@ -177,11 +172,14 @@ namespace WPFMapApp
             Items.Add(item);
         }
 
-        private void InsertAt(int index)
+        private void InsertAt()
         {
             var item = new MyPoint();
             item.X = 0;
             item.Y = 0;
+            if (SelectedItem == null)
+                return;
+            int index = Items.IndexOf(SelectedItem);
             if (index <= Items.Count - 1)
             {
                 Items.Insert(index, item);
@@ -192,9 +190,11 @@ namespace WPFMapApp
             }
         }
 
-        public void RemoveAt(MyPoint p)
+        public void RemoveAt()
         {
-            int index = Items.IndexOf(p);
+            if (SelectedItem == null)
+                return;
+            int index = Items.IndexOf(SelectedItem);
             if (index <= Items.Count - 1)
             {
                 Items.RemoveAt(index);
@@ -204,6 +204,7 @@ namespace WPFMapApp
         private void ClearData()
         {
             Items.Clear();
+            SelectedItem = null;
         }
 
     }

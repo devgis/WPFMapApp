@@ -181,6 +181,11 @@ namespace WPFMapApp
                 MyPoints = managerWindow.MyPoints;
                 if (MyPoints.Count >= 2)
                 {
+                    //update index
+                    for (int i = 0; i < MyPoints.Count; i++)
+                    {
+                        MyPoints[i].Index = i;
+                    }
                     DrawLine(MyPoints);
                 }
             }
@@ -200,19 +205,28 @@ namespace WPFMapApp
             }
             else
             {
-                SaveFileDialog sfd = new SaveFileDialog();
-                sfd.FileName = "MyPoints"; // Default file name
-                sfd.DefaultExt = ".text"; // Default file extension
-                sfd.Filter = "Text documents (.txt)|*.txt"; // Filter files by extensioni
-                if (sfd.ShowDialog() == true)
+                try
                 {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var p in MyPoints)
+                    SaveFileDialog sfd = new SaveFileDialog();
+                    sfd.FileName = "MyPoints"; // Default file name
+                    sfd.DefaultExt = ".text"; // Default file extension
+                    sfd.Filter = "Text documents (.txt)|*.txt"; // Filter files by extensioni
+                    if (sfd.ShowDialog() == true)
                     {
-                        sb.AppendLine($"{p.Index},{p.X},{p.Y}");
+                        StringBuilder sb = new StringBuilder();
+                        foreach (var p in MyPoints)
+                        {
+                            sb.AppendLine($"{p.Index},{p.X},{p.Y}");
+                        }
+                        File.WriteAllText(sfd.FileName, sb.ToString());
+                        MessageHelper.ShowInfo("导出成功！");
                     }
-                    File.WriteAllText(sfd.FileName,sfd.ToString());
-                }            }
+                }
+                catch(Exception ex)
+                {
+                    MessageHelper.ShowInfo("导出出错："+ex.Message);
+                }
+            }
         }
 
         private void btImportPanel_Click(object sender, RoutedEventArgs e)
@@ -230,36 +244,44 @@ namespace WPFMapApp
                 }
                 else
                 {
-                    MyPoints = new List<MyPoint>();
-                    foreach (string s in allLines)
+                    try
                     {
-                        if (!string.IsNullOrEmpty(s))
+                        MyPoints = new List<MyPoint>();
+                        foreach (string s in allLines)
                         {
-                            string[] temparr = s.Split(',');
-                            if (temparr != null && temparr.Length == 3)
+                            if (!string.IsNullOrEmpty(s))
                             {
-                                try
+                                string[] temparr = s.Split(',');
+                                if (temparr != null && temparr.Length == 3)
                                 {
-                                    MyPoint p = new MyPoint();
-                                    p.Index = Convert.ToInt32(temparr[0]);
-                                    p.X = Convert.ToSingle(temparr[1]);
-                                    p.Y = Convert.ToSingle(temparr[2]);
-                                    MyPoints.Add(p);
+                                    try
+                                    {
+                                        MyPoint p = new MyPoint();
+                                        p.Index = Convert.ToInt32(temparr[0]);
+                                        p.X = Convert.ToSingle(temparr[1]);
+                                        p.Y = Convert.ToSingle(temparr[2]);
+                                        MyPoints.Add(p);
+                                    }
+                                    catch
+                                    { }
                                 }
-                                catch
-                                { }
                             }
                         }
+                        if (MyPoints.Count <= 2)
+                        {
+                            MessageHelper.ShowError("导入数据不正确，导入0条记录");
+                        }
+                        else
+                        {
+                            //绘制曲线
+                            DrawLine(MyPoints);
+                        }
                     }
-                    if (MyPoints.Count <= 2)
+                    catch (Exception ex)
                     {
-                        MessageHelper.ShowError("导入数据不正确，导入0条记录");
+                        MessageHelper.ShowInfo("导入出错：" + ex.Message);
                     }
-                    else
-                    {
-                        //绘制曲线
-                        DrawLine(MyPoints);
-                    }
+                    
                 }
             }
         }

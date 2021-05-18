@@ -24,7 +24,7 @@
         <Button x:Name="btDelete" Grid.Row="0" Grid.Column="3" Content="删除"   Command="{Binding RemoveCmd}" CommandParameter="{Binding}"/>
         <Button x:Name="btClear" Grid.Row="0" Grid.Column="4" Content="清空"   Command="{Binding ClearDataCmd}"/>
 
-        <DataGrid x:Name="dgList" ItemsSource="{Binding Items}" SelectionUnit="Cell" SelectionMode="Extended" Grid.Row="1" Grid.Column="0" AutoGenerateColumns="False" CanUserSortColumns="False" Grid.ColumnSpan="9999" >
+        <DataGrid x:Name="dgList" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem ,Mode=TwoWay}" SelectionMode="Single" SelectionUnit="FullRow" Grid.Row="1" Grid.Column="0" AutoGenerateColumns="False" CanUserSortColumns="False" Grid.ColumnSpan="9999" >
             <DataGrid.Columns>
                 <DataGridTextColumn  Header="X(-180~180)" x:Name="XCloumn" Width="200*" Binding="{Binding X}"/>
                 <DataGridTextColumn Header="Y(-90~90)" x:Name="YCloumn"  Width="200*" Binding="{Binding Y}"/>

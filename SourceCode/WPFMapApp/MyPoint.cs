@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WPFMapApp
 {
-    public struct MyPoint
+    public class MyPoint
     {
         public int Index { get; set; }
         public float X { get; set; }
