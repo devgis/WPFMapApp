@@ -9,7 +9,7 @@ namespace WPFMapApp
 {
     public class MessageHelper
     {
-        private static string MessageTitle = "System";
+        private static string MessageTitle = "系统提示";
 
         /// <summary>
         /// Show a error message

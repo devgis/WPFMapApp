@@ -40,65 +40,12 @@ namespace WPFMapApp
 
             Uri uri = new Uri(@"pack://application:,,,/map.html");
             MainMapView.NavigateToStream(Application.GetResourceStream(uri).Stream);
-
-            
         }
 
+        #region 系统事件
         private void MainMapView_Navigated(object sender, NavigationEventArgs e)
         {
             SuppressScriptErrors((WebBrowser)sender, true);
-        }
-
-        public void SuppressScriptErrors(WebBrowser wb, bool Hide)
-        {
-            FieldInfo fiComWebBrowser = typeof(WebBrowser).GetField("_axIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (fiComWebBrowser == null) return;
-
-            object objComWebBrowser = fiComWebBrowser.GetValue(wb);
-            if (objComWebBrowser == null) return;
-
-            objComWebBrowser.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, objComWebBrowser, new object[] { Hide });
-        }
-
-        public void SetMapCenter(float x, float y)
-        {
-            MainMapView.InvokeScript("setCenter",new object[] { x,y});
-        }
-
-        public void DrawLine(List<MyPoint> points)
-        {
-            if (points == null || points.Count <= 0)
-            {
-                RemoveLine();
-                return;
-            }
-            try
-            {
-                //List<float> langandlats = new List<float>();
-                //foreach (var p in points)
-                //{
-                //    langandlats.AddRange(new float[] { p.X, p.Y });
-                //}
-                MainMapView.InvokeScript("drawLine",JsonConvert.SerializeObject(points));
-            }
-            catch(Exception ex)
-            {
-                MessageHelper.ShowError("绘制轨迹发生错误:"+ex.Message);
-            }
-            
-        }
-
-        public void RemoveLine()
-        {
-            try
-            {
-                MainMapView.InvokeScript("removeLine", null);
-            }
-            catch (Exception ex)
-            {
-                MessageHelper.ShowError("清除轨迹发生错误:" + ex.Message);
-            }
-
         }
 
         private void SetCenter_Click(object sender, RoutedEventArgs e)
@@ -170,7 +117,11 @@ namespace WPFMapApp
 
         private void btClearLine_Click(object sender, RoutedEventArgs e)
         {
-            RemoveLine();
+            if (MessageHelper.ShowQuestion("确认清除?"))
+            {
+                RemoveLine();
+                MyPoints.Clear();
+            }
         }
 
         private void btManagerLine_Click(object sender, RoutedEventArgs e)
@@ -231,59 +182,117 @@ namespace WPFMapApp
 
         private void btImportPanel_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.FileName = "MyPoints"; // Default file name
-            ofd.DefaultExt = ".text"; // Default file extension
-            ofd.Filter = "Text documents (.txt)|*.txt"; // Filter files by extensioni
-            if (ofd.ShowDialog() == true)
+            if (MessageHelper.ShowQuestion("确认导入，将替换当前数据?"))
             {
-                string[] allLines= File.ReadAllLines(ofd.FileName);
-                if (allLines == null || allLines.Length <= 0)
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.FileName = "MyPoints"; // Default file name
+                ofd.DefaultExt = ".text"; // Default file extension
+                ofd.Filter = "Text documents (.txt)|*.txt"; // Filter files by extensioni
+                if (ofd.ShowDialog() == true)
                 {
-                    MessageHelper.ShowError("导入失败,可能文件为空！");
-                }
-                else
-                {
-                    try
+                    string[] allLines = File.ReadAllLines(ofd.FileName);
+                    if (allLines == null || allLines.Length <= 0)
                     {
-                        MyPoints = new List<MyPoint>();
-                        foreach (string s in allLines)
+                        MessageHelper.ShowError("导入失败,可能文件为空！");
+                    }
+                    else
+                    {
+                        try
                         {
-                            if (!string.IsNullOrEmpty(s))
+                            MyPoints = new List<MyPoint>();
+                            foreach (string s in allLines)
                             {
-                                string[] temparr = s.Split(',');
-                                if (temparr != null && temparr.Length == 3)
+                                if (!string.IsNullOrEmpty(s))
                                 {
-                                    try
+                                    string[] temparr = s.Split(',');
+                                    if (temparr != null && temparr.Length == 3)
                                     {
-                                        MyPoint p = new MyPoint();
-                                        p.Index = Convert.ToInt32(temparr[0]);
-                                        p.X = Convert.ToSingle(temparr[1]);
-                                        p.Y = Convert.ToSingle(temparr[2]);
-                                        MyPoints.Add(p);
+                                        try
+                                        {
+                                            MyPoint p = new MyPoint();
+                                            p.Index = Convert.ToInt32(temparr[0]);
+                                            p.X = Convert.ToSingle(temparr[1]);
+                                            p.Y = Convert.ToSingle(temparr[2]);
+                                            MyPoints.Add(p);
+                                        }
+                                        catch
+                                        { }
                                     }
-                                    catch
-                                    { }
                                 }
                             }
+                            if (MyPoints.Count <= 2)
+                            {
+                                MessageHelper.ShowError("导入数据不正确，导入0条记录");
+                            }
+                            else
+                            {
+                                //绘制曲线
+                                DrawLine(MyPoints);
+                            }
                         }
-                        if (MyPoints.Count <= 2)
+                        catch (Exception ex)
                         {
-                            MessageHelper.ShowError("导入数据不正确，导入0条记录");
+                            MessageHelper.ShowInfo("导入出错：" + ex.Message);
                         }
-                        else
-                        {
-                            //绘制曲线
-                            DrawLine(MyPoints);
-                        }
+
                     }
-                    catch (Exception ex)
-                    {
-                        MessageHelper.ShowInfo("导入出错：" + ex.Message);
-                    }
-                    
                 }
             }
         }
+        #endregion
+
+        #region 公共方法
+        public void SuppressScriptErrors(WebBrowser wb, bool Hide)
+        {
+            FieldInfo fiComWebBrowser = typeof(WebBrowser).GetField("_axIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (fiComWebBrowser == null) return;
+
+            object objComWebBrowser = fiComWebBrowser.GetValue(wb);
+            if (objComWebBrowser == null) return;
+
+            objComWebBrowser.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, objComWebBrowser, new object[] { Hide });
+        }
+
+        public void SetMapCenter(float x, float y)
+        {
+            MainMapView.InvokeScript("setCenter", new object[] { x, y });
+        }
+
+        public void DrawLine(List<MyPoint> points)
+        {
+            if (points == null || points.Count <= 0)
+            {
+                RemoveLine();
+                return;
+            }
+            try
+            {
+                //List<float> langandlats = new List<float>();
+                //foreach (var p in points)
+                //{
+                //    langandlats.AddRange(new float[] { p.X, p.Y });
+                //}
+                MainMapView.InvokeScript("drawLine", JsonConvert.SerializeObject(points));
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowError("绘制轨迹发生错误:" + ex.Message);
+            }
+
+        }
+
+        public void RemoveLine()
+        {
+            try
+            {
+                MainMapView.InvokeScript("removeLine", null);
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowError("清除轨迹发生错误:" + ex.Message);
+            }
+
+        }
+        #endregion
     }
 }
