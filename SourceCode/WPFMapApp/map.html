@@ -24,6 +24,7 @@
             left: 20px;
             bottom: auto;
         }
+
         #text {
             opacity: 0.3;
         }
@@ -160,7 +161,7 @@
                         image: "http://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
                         size: new AMap.Size(20, 20),  //图标大小
                         imageSize: new AMap.Size(20, 20)
-                    }),
+                    }),
                     //icon: "http://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
                     offset: new AMap.Pixel(-10, -20)
                 });
@@ -178,12 +179,55 @@
                 //    cursor: 'pointer',
                 //    clickable: true
                 //})
+                
+
+                // 设置鼠标划过点标记显示的文字提示
+                marker.setTitle(''+i);
+
+                // 设置label标签
+                // label默认蓝框白底左上角显示，样式className为：amap-marker-label
+                marker.setLabel({
+                    offset: new AMap.Pixel(-15, 20),  //设置文本标注偏移量
+                    content: "<div>"+i+"</div>", //设置文本标注内容
+                    direction: 'right' //设置文本标注方位
+                });
+
                 marker.setMap(map);
                 markers.push(marker);
 
-                marker.content = '坐标 X:' + points[i].X + ' Y:' + points[i].Y;
+                marker.content = " 坐标"+i+":(" + points[i].X + "," + points[i].Y+")";
                 marker.on('click', markerClick);
-                //marker.emit('click', { target: marker }); //默认不打开
+
+
+                //// 创建纯文本标记
+                //var textMarker = new AMap.Text({
+                //    text: ""+i,
+                //    anchor: 'center', // 设置文本标记锚点
+                //    draggable: true,
+                //    cursor: 'pointer',
+                //    angle: 3,
+                //    //style: {
+                //    //    'padding': '.75rem 1.25rem',
+                //    //    'margin-bottom': '1rem',
+                //    //    'border-radius': '.25rem',
+                //    //    'background-color': 'white',
+                //    //    'width': '15rem',
+                //    //    'border-width': 0,
+                //    //    'box-shadow': '0 2px 6px 0 rgba(114, 124, 245, .5)',
+                //    //    'text-align': 'center',
+                //    //    'font-size': '20px',
+                //    //    'color': 'blue'
+                //    //},
+                //    offset: new AMap.Pixel(0, 10),
+                //    position: [points[i].X, points[i].Y]
+                //});
+
+                //textMarker.setMap(map);
+                //markers.push(textMarker);
+
+
+
+                //marker.emit('click', {target: marker }); //默认不打开
             }
             //alert(typeof path);
             // 创建折线实例
@@ -193,9 +237,6 @@
                 strokeColor: 'red', // 线条颜色
                 lineJoin: 'round' // 折线拐点连接处样式
             });
-
-            
-            
 
             // 将折线添加至地图实例
             map.add(polyline);
@@ -219,7 +260,7 @@
             markers = [];
         }
 
-        ////test methods 
+        ////test methods
         //drawLine("[{\"Index\":0,\"X\":102.34,\"Y\":31.32},{\"Index\":1,\"X\":103.34,\"Y\":33.32},{\"Index\":2,\"X\":105.34,\"Y\":32.32},{\"Index\":3,\"X\":108.34,\"Y\":34.32}]");
         //removeLine();
     </script>
